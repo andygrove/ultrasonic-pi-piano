@@ -1,6 +1,7 @@
 # Ultrasonic Pi Piano with Gesture Control
 
-![Raspberry Pi Octasonic Piano](https://www.youtube.com/watch?v=afq1mwi4v5Q)
+[<img src="https://img.youtube.com/vi/afq1mwi4v5Q/hqdefault.jpg" width="600" height="300"
+/>](https://www.youtube.com/embed/afq1mwi4v5Q)
 
 This project for the Raspberry Pi uses inexpensive HC-SR04 ultrasonic sensors as inputs and turns them into keys 
 on a MIDI keyboard. There's something pretty neat about using sound to make sound. It's like fighting fire with 
