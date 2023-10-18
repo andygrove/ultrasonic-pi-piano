@@ -17,5 +17,7 @@ from the [Makers Grove Tindie Store](https://www.tindie.com/products/andygrove73
 # Resources
 
 - [Creating an Ultrasonic Pi Piano](docs/instructions.md)
+- [Ultrasonic Pi Piano Python Code](python)
+- [Ultrasonic Pi Piano Rust Code](rust)
 
 
