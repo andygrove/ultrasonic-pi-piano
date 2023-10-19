@@ -1,15 +1,19 @@
+import sys
+import time
 from octasonic import Octasonic
 
 octasonic = Octasonic(0)
 protocol_version = octasonic.get_protocol_version()
 firmware_version = octasonic.get_firmware_version()
-print("Protocol v%s; Firmware v%s" % (protocol_version, firmware_version))
-octasonic.set_sensor_count(8)
-print("Sensor count: %s" % octasonic.get_sensor_count())
+print("# Protocol v%s; Firmware v%s" % (protocol_version, firmware_version), file=sys.stderr)
+if protocol_version == 0:
+    raise "Failed to fetch protocol version from board. Check wiring and check that SPI is enabled."
 
-# TODO
-# octasonic.set_max_distance(2); // 2= 48 cm
-# octasonic.set_interval(2); // no pause between taking sensor readings
+octasonic.set_sensor_count(8)
+print("# Sensor count: %s" % octasonic.get_sensor_count(), file=sys.stderr)
+
+octasonic.set_max_distance(2) # 2= 48 cm
+octasonic.set_interval(2) # no pause between taking sensor readings
 
 # The MIDI note number for the currently playing note, or 0 for no note
 key_note = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
@@ -38,11 +42,10 @@ velocity = 127
 # determine the max distance to measure
 cm_per_note = 5
 
-# TODO enable gestures
-# let mut gesture_change_instrument = 129_u8; // two outermost sensors
-# let mut gesture_shutdown = 24_u8; // middle two sensors
-
 max_distance = len(scale) * cm_per_note
+
+for i in range(8):
+    print("prog {} 1".format(i+1))
 
 # now start taking measurements from the sensors in a loop
 counter = 0
@@ -55,11 +58,11 @@ while True:
 
     # take readings from each sensor
     distance = []
-    for i in range(0, 7):
+    for i in range(8):
         distance.append(octasonic.get_sensor_reading(i))
 
     # debug logging
-    # print(distance)
+    # print(distance, file=sys.stderr)
 
     for i in range(8):
         channel = i + 1
@@ -77,6 +80,7 @@ while True:
                     print("noteoff {} {}".format(channel, key_note[i]))
                 # play the new note
                 key_note[i] = new_note
+                key_counter[i] = 0
                 print("noteon {} {} {}".format(channel, key_note[i], velocity))
             elif key_note[i] > 0:
                 # a note was playing but the key is not currently covered
@@ -85,5 +89,6 @@ while True:
                     # it's time to stop playing this note
                     print("noteoff {} {}".format(channel, key_note[i]))
                     key_note[i] = 0
+                    key_counter[i] = 0
 
     counter = counter + 1

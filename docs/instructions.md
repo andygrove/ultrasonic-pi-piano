@@ -1,7 +1,5 @@
 # Building an Ultrasonic Pi Piano
 
-NOTE: This is a draft document. For the most up-to-date docs, please refer to the [Instructable](https://www.instructables.com/Ultrasonic-Pi-Piano-With-Gesture-Controls/).
-
 ## Parts
 
 In addition to a Raspberry Pi (model 3B or above recommended), you will need the following electronic components:
@@ -21,7 +19,6 @@ table and diagram as a reference.
 
 *Please be careful not to confuse GPIO pin numbers with the physical pin numbers in the diagram. This is a common 
 mistake! For example, GPIO pin 9 is physical pin 21 in the diagram.*
-
 
 | Octasonic | Raspberry Pi  |
 |-----------|---------------|
@@ -52,11 +49,13 @@ Next, we will install the [Octasonic Python Library](https://pypi.org/project/oc
 pip install octasonic
 ```
 
-We can now download a Python example that will check that the board and sensors are working correctly.
+We can now download the Python code for running the piano software. This will detect movement over the keys and translate
+them into MIDI instructions, which will be written to the standard output stream.
 
 ```shell
-wget https://github.com/makersgrove/octasonic-python/blob/main/examples/demo.py
-python demo.py
+git clone https://github.com/makersgrove/ultrasonic-pi-piano.git
+cd ultrasonic-pi-piano/python
+python piano.py
 ```
 
 You should see output similar to the following:
@@ -69,64 +68,34 @@ Sensor count: 8
 This demonstrates that communication between the Raspberry Pi and the Octasonic is working correctly. If you see 
 zeroes instead of these values then it probably means that either SPI is not enabled, or there is a wiring mistake.
 
-The output will then show some seemingly random numbers in a loop:
+The output will then show some seemingly random instructions in a loop. You should see these numbers change as you move 
+your hands over the sensors. If not, then it could indicate an error with the wiring between the sensors and the 
+Octasonic board.
 
 ```
-[ 8, 0, 0, 0, 0, 0, 0, 22 ]
-[ 8, 0, 0, 0, 22, 34, 0, 22 ]
+noteon 8 96 127
+noteon 4 52 127
+noteoff 8 96
 ...
 ```
 
-You should see these numbers change as you move your hands over the sensors. If not, then it could indicate an error 
-with the wiring between the sensors and the Octasonic board.
+You are seeing the MIDI instructions, but you will hear any sound yet. We now need to send these 
+notes to a synthesizer.
 
-# Running in headless mode
+# Install FluidSynth
 
-To have the code start up when you boot the Raspberry Pi (without needing keyboard, mouse, and monitor attached) add these lines to your `/etc/rc.local` file and reboot.
+Fluidsynth is an amazing free software MIDI synth. You can install it from the command-line with this command:
 
-```
-. /home/pi/.cargo/env
-cd /home/pi/UltrasonicPiPiano
-./run.sh > /var/log/ultrasonic-pi.log 2>&1
-
+```shell
+sudo apt-get install fluidsynth
 ```
 
-In my case, the full `/etc/rc.local` file looked like this after adding those lines:
+Now we can run the piano.py Python script again, and pipe the output to fluidsynth. Note that Python usually buffers 
+output, so we need to be sure to specify the `-u` flag to override this.
 
-```
-#!/bin/sh -e
-#
-# rc.local
-#
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-#
-# In order to enable or disable this script just change the execution
-# bits.
-#
-# By default this script does nothing.
-
-# Print the IP address
-_IP=$(hostname -I) || true
-if [ "$_IP" ]; then
-  printf "My IP address is %s\n" "$_IP"
-fi
-
-. /home/pi/.cargo/env
-cd /home/pi/UltrasonicPiPiano
-./run.sh > /var/log/ultrasonic-pi.log 2>&1
-
-exit 0
+```shell
+python -u piano.py | fluidsynth -a alsa -g 1.0 -l /usr/share/sounds/sf2/FluidR3_GM.sf2
 ```
 
-If the code doesn't start running on bootup, check the log at `/var/log/ultrasonic-pi.log` for error messages.
 
-# Stopping the program from running
-
-To stop the program from running in the background, run the following command:
-
-```
-sudo killall -9 ultrasonic_piano
-```
 
