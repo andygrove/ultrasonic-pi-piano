@@ -11,8 +11,7 @@ Click on this preview to see the Ultrasonic Pi Piano in action!
 
 [<img src="https://img.youtube.com/vi/afq1mwi4v5Q/hqdefault.jpg"/>](https://www.youtube.com/embed/afq1mwi4v5Q)
 
-This repository contains documentation for creating your own Ultrasonic Pi Piano, but you can also buy kits 
-from the [Makers Grove Tindie Store](https://www.tindie.com/products/andygrove73/ultrasonic-pi-piano/).
+This repository contains documentation for creating your own Ultrasonic Pi Piano.
 
 # Resources
 
